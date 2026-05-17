@@ -1,0 +1,6 @@
+step,rows
+merge alvo + atributos,11492
+mínimo de 5 cotações por anúncio,10789
+"raio geográfico <= 150 km, mantendo praia/premium",10664
+sanidade estrutural,10618
+sem corte final de alvo; robustez via log-preço e perda absoluta,10618

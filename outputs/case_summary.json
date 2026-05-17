@@ -1,0 +1,102 @@
+{
+  "final_model": "robust_segmented_hgb_log_mae",
+  "n_modeling_rows": 10618,
+  "n_train": 8494,
+  "n_test": 2124,
+  "row_price_filter": {
+    "p001": 101.53333333333332,
+    "p999": 63077.0
+  },
+  "target_range": {
+    "min": 101.66666666666669,
+    "max": 56551.0
+  },
+  "segment_counts": {
+    "urban_core": 9964,
+    "beach_premium": 385,
+    "extended_market": 269
+  },
+  "market_center": {
+    "lat": -23.564541613433974,
+    "lon": -46.661510491814475
+  },
+  "metrics": {
+    "model": "robust_segmented_hgb_log_mae",
+    "MAE": 353.961287080814,
+    "RMSE": 2362.6796791258653,
+    "MAPE": 23.866282300277756,
+    "MdAPE": 16.6052651232221,
+    "R2_log": 0.5170369908889587,
+    "Bias": -282.64832168977915
+  },
+  "top_features": [
+    {
+      "feature": "bathrooms_model",
+      "importance_mae": 63.52566549535361,
+      "importance_std": 2.1421996954531473
+    },
+    {
+      "feature": "lon",
+      "importance_mae": 26.99535248814726,
+      "importance_std": 0.9411419011154243
+    },
+    {
+      "feature": "lat",
+      "importance_mae": 25.637067279345764,
+      "importance_std": 1.038542937050741
+    },
+    {
+      "feature": "bedrooms_model",
+      "importance_mae": 23.269375219730126,
+      "importance_std": 1.2610074384422498
+    },
+    {
+      "feature": "has_beach",
+      "importance_mae": 17.01406550519913,
+      "importance_std": 0.6273303929041492
+    },
+    {
+      "feature": "distance_to_market_center_km",
+      "importance_mae": 8.801052351792702,
+      "importance_std": 0.4147705874881294
+    },
+    {
+      "feature": "guests_model",
+      "importance_mae": 7.602352198827373,
+      "importance_std": 0.727738230821414
+    },
+    {
+      "feature": "is_superhost_int",
+      "importance_mae": 1.4711694454592248,
+      "importance_std": 0.9245797879716294
+    },
+    {
+      "feature": "has_metro",
+      "importance_mae": 1.3363403253809338,
+      "importance_std": 0.634508932339687
+    },
+    {
+      "feature": "title_word_count",
+      "importance_mae": 1.297538416580983,
+      "importance_std": 0.12829857515023488
+    }
+  ],
+  "scenario_impacts": [
+    {
+      "scenario": "+1 bedroom, demais variáveis constantes",
+      "n": 2124,
+      "median_delta_rs": 14.521614597823984,
+      "mean_delta_rs": 28.861239508654833,
+      "median_delta_pct": 4.969593543294923,
+      "mean_delta_pct": 7.328362774426756
+    },
+    {
+      "scenario": "+1 bathroom, demais variáveis constantes",
+      "n": 2124,
+      "median_delta_rs": 119.54651524356461,
+      "mean_delta_rs": 138.15234759046615,
+      "median_delta_pct": 42.488993596815334,
+      "mean_delta_pct": 42.87574902695536
+    }
+  ]
+}

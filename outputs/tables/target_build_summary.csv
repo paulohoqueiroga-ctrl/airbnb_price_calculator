@@ -1,0 +1,6 @@
+step,rows,unique_ids
+linhas de preço originais,1090726,11494
+linhas com price_per_night positivo,1090726,11494
+linhas após filtro p0.1-p99.9,1088557,11492
+alvo agregado por anúncio,11492,11492
+merge alvo + atributos,11492,11492

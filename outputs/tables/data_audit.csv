@@ -1,0 +1,3 @@
+dataset,rows,columns,unique_ids,duplicated_rows,memory_mb
+airbnb_apart,19068,16,19068,0,12.4
+airbnb_prices,1090726,22,11494,0,431.9

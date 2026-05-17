@@ -1,0 +1,3 @@
+scenario,n,median_delta_rs,mean_delta_rs,median_delta_pct,mean_delta_pct
+"+1 bedroom, demais variáveis constantes",2124,14.521614597823984,28.861239508654833,4.969593543294923,7.328362774426756
+"+1 bathroom, demais variáveis constantes",2124,119.54651524356461,138.15234759046615,42.488993596815334,42.87574902695536
