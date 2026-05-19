@@ -8,7 +8,7 @@ import pandas as pd
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL_PATH = ROOT / "models" / "tabas_base_price_model.joblib"
+MODEL_PATH = ROOT / "models" / "base_price_model.joblib"
 MODELING_DATASET = ROOT / "outputs" / "modeling_dataset.csv"
 RAW_NEIGHBORHOOD_TABLE = ROOT / "outputs" / "tables" / "raw_neighborhood_prices.csv"
 
@@ -235,6 +235,353 @@ def compare_bedroom_variants(artifact, trained_neighborhood_counts):
     print(pd.DataFrame(rows).round(2).to_string(index=False))
 
 
+def make_new_apartment_case(case_name, suite, **overrides):
+    base = {
+        "airbnb_neighborhood": "Liberdade",
+        "ad_title": "Apartamento completo na Liberdade perto do metro",
+        "listing_obj_type": "REGULAR",
+        "kicker_content_message": "Entire rental unit in Liberdade, perto do metro, wifi e ar condicionado",
+        "is_superhost": True,
+        "is_new_listing": False,
+        "guests": 2,
+        "bedrooms": 1,
+        "beds": 1,
+        "bathrooms": "1",
+        "lat": -23.557,
+        "lon": -46.635,
+    }
+    base.update(overrides)
+    base["_case"] = case_name
+    base["_suite"] = suite
+    return base
+
+
+def build_consistent_new_apartments():
+    return [
+        make_new_apartment_case(
+            "liberdade_1p_1q",
+            "Liberdade - crescimento coerente",
+            guests=1,
+            bedrooms=1,
+            beds=1,
+            bathrooms="1",
+            ad_title="Studio completo na Liberdade perto do metro",
+            kicker_content_message="Studio em Liberdade, perto do metro, wifi e ar condicionado",
+        ),
+        make_new_apartment_case(
+            "liberdade_2p_1q",
+            "Liberdade - crescimento coerente",
+            guests=2,
+            bedrooms=1,
+            beds=1,
+            bathrooms="1",
+        ),
+        make_new_apartment_case(
+            "liberdade_4p_2q",
+            "Liberdade - crescimento coerente",
+            guests=4,
+            bedrooms=2,
+            beds=2,
+            bathrooms="2",
+            ad_title="Apartamento de 2 quartos na Liberdade perto do metro",
+            kicker_content_message="Entire rental unit in Liberdade para familia, metro, wifi e ar condicionado",
+        ),
+        make_new_apartment_case(
+            "liberdade_6p_3q",
+            "Liberdade - crescimento coerente",
+            guests=6,
+            bedrooms=3,
+            beds=4,
+            bathrooms="2",
+            ad_title="Apartamento amplo de 3 quartos na Liberdade perto do metro",
+            kicker_content_message="Apartamento amplo em Liberdade para familia, metro, wifi e ar condicionado",
+        ),
+        make_new_apartment_case(
+            "liberdade_8p_4q",
+            "Liberdade - crescimento coerente",
+            guests=8,
+            bedrooms=4,
+            beds=5,
+            bathrooms="3",
+            ad_title="Apartamento grande de 4 quartos na Liberdade perto do metro",
+            kicker_content_message="Apartamento grande em Liberdade para grupo, metro, wifi e ar condicionado",
+        ),
+        make_new_apartment_case(
+            "pinheiros_2p_1q",
+            "Pinheiros - crescimento coerente",
+            airbnb_neighborhood="Pinheiros",
+            guests=2,
+            bedrooms=1,
+            beds=1,
+            bathrooms="1",
+            lat=-23.561,
+            lon=-46.696,
+            ad_title="Apartamento completo em Pinheiros perto do metro",
+            kicker_content_message="Entire rental unit in Pinheiros, perto do metro, wifi e ar condicionado",
+        ),
+        make_new_apartment_case(
+            "pinheiros_4p_2q",
+            "Pinheiros - crescimento coerente",
+            airbnb_neighborhood="Pinheiros",
+            guests=4,
+            bedrooms=2,
+            beds=2,
+            bathrooms="2",
+            lat=-23.561,
+            lon=-46.696,
+            ad_title="Apartamento de 2 quartos em Pinheiros perto do metro",
+            kicker_content_message="Apartamento em Pinheiros para familia, perto do metro, wifi e ar condicionado",
+        ),
+        make_new_apartment_case(
+            "pinheiros_6p_3q",
+            "Pinheiros - crescimento coerente",
+            airbnb_neighborhood="Pinheiros",
+            guests=6,
+            bedrooms=3,
+            beds=4,
+            bathrooms="2",
+            lat=-23.561,
+            lon=-46.696,
+            ad_title="Apartamento amplo de 3 quartos em Pinheiros perto do metro",
+            kicker_content_message="Apartamento amplo em Pinheiros para familia, metro, wifi e ar condicionado",
+        ),
+        make_new_apartment_case(
+            "riviera_4p_2q",
+            "Riviera - crescimento coerente",
+            airbnb_neighborhood="Riviera De Sao Lourenco",
+            guests=4,
+            bedrooms=2,
+            beds=2,
+            bathrooms="2",
+            lat=-23.793,
+            lon=-46.018,
+            ad_title="Apartamento de praia na Riviera de Sao Lourenco com vista",
+            kicker_content_message="Apartamento na praia em Riviera de Sao Lourenco, vista, varanda, piscina e ar condicionado",
+        ),
+        make_new_apartment_case(
+            "riviera_8p_4q",
+            "Riviera - crescimento coerente",
+            airbnb_neighborhood="Riviera De Sao Lourenco",
+            guests=8,
+            bedrooms=4,
+            beds=5,
+            bathrooms="3",
+            lat=-23.793,
+            lon=-46.018,
+            ad_title="Apartamento grande de praia na Riviera de Sao Lourenco com vista",
+            kicker_content_message="Apartamento grande na praia em Riviera de Sao Lourenco, vista, varanda, piscina e ar condicionado",
+        ),
+        make_new_apartment_case(
+            "riviera_12p_5q",
+            "Riviera - crescimento coerente",
+            airbnb_neighborhood="Riviera De Sao Lourenco",
+            guests=12,
+            bedrooms=5,
+            beds=7,
+            bathrooms="4",
+            lat=-23.793,
+            lon=-46.018,
+            ad_title="Cobertura de praia na Riviera de Sao Lourenco com vista",
+            kicker_content_message="Cobertura na praia em Riviera de Sao Lourenco, vista, varanda, piscina e ar condicionado",
+        ),
+    ]
+
+
+def build_guest_only_sensitivity_cases():
+    guests_values = [1, 2, 3, 4, 6, 8, 12, 16, 20]
+    return [
+        make_new_apartment_case(
+            f"guests_only_{guests:02d}p",
+            "Sensibilidade isolada de guests",
+            guests=guests,
+            bedrooms=1,
+            beds=1,
+            bathrooms="1",
+        )
+        for guests in guests_values
+    ]
+
+
+def build_stress_cases():
+    return [
+        make_new_apartment_case(
+            "cap_stress_20p_15q_10c_1b",
+            "Stress de caps e consistencia",
+            guests=20,
+            bedrooms=15,
+            beds=10,
+            bathrooms="1",
+        )
+    ]
+
+
+def predict_apartment_cases(cases, artifact, trained_neighborhood_counts):
+    rows = []
+    for case in cases:
+        raw_values = {key: value for key, value in case.items() if not key.startswith("_")}
+        raw = pd.DataFrame([raw_values])
+        pred, features, issues, fallback = predict_with_diagnostics(raw, artifact, trained_neighborhood_counts)
+        raw_row = raw.iloc[0]
+        feature_row = features.iloc[0]
+        rows.append(
+            {
+                "suite": case["_suite"],
+                "case": case["_case"],
+                "bairro": raw_row["airbnb_neighborhood"],
+                "guests_raw": raw_row["guests"],
+                "guests_model": feature_row["guests_model"],
+                "bedrooms_raw": raw_row["bedrooms"],
+                "bedrooms_model": feature_row["bedrooms_model"],
+                "beds_raw": raw_row["beds"],
+                "beds_model": feature_row["beds_model"],
+                "bathrooms_raw": raw_row["bathrooms"],
+                "bathrooms_model": feature_row["bathrooms_model"],
+                "segmento": feature_row["market_segment"],
+                "dist_km": feature_row["distance_to_market_center_km"],
+                "preco_previsto": pred[0],
+                "diagnosticos": "; ".join(issues),
+                "fallback": fallback,
+            }
+        )
+
+    out = pd.DataFrame(rows)
+    out["delta_vs_suite_base"] = out["preco_previsto"] - out.groupby("suite")["preco_previsto"].transform("first")
+    out["pct_vs_suite_base"] = (
+        out["preco_previsto"] / out.groupby("suite")["preco_previsto"].transform("first") - 1
+    ) * 100
+    return out
+
+
+def print_apartment_case_table(title, cases_df):
+    printable = cases_df.drop(columns=["fallback"]).copy()
+    float_cols = [
+        "guests_model",
+        "bedrooms_model",
+        "beds_model",
+        "bathrooms_model",
+        "dist_km",
+        "preco_previsto",
+        "delta_vs_suite_base",
+        "pct_vs_suite_base",
+    ]
+    for col in float_cols:
+        printable[col] = printable[col].astype(float)
+
+    print(f"\n{title}")
+    print(
+        printable[
+            [
+                "suite",
+                "case",
+                "bairro",
+                "guests_raw",
+                "guests_model",
+                "bedrooms_raw",
+                "bedrooms_model",
+                "beds_raw",
+                "beds_model",
+                "bathrooms_raw",
+                "bathrooms_model",
+                "segmento",
+                "dist_km",
+                "preco_previsto",
+                "delta_vs_suite_base",
+                "pct_vs_suite_base",
+                "diagnosticos",
+            ]
+        ]
+        .round(2)
+        .to_string(index=False)
+    )
+
+
+def print_training_guest_reference(modeling_df):
+    reference = (
+        modeling_df.groupby("guests_model")
+        .agg(
+            n=("base_price", "size"),
+            median_price=("base_price", "median"),
+            mean_price=("base_price", "mean"),
+            median_bedrooms=("bedrooms_model", "median"),
+            median_bathrooms=("bathrooms_model", "median"),
+            beach_share=("has_beach", "mean"),
+        )
+        .reset_index()
+    )
+    reference = reference.loc[reference["n"].ge(10)].copy()
+    reference["beach_share"] = reference["beach_share"] * 100
+
+    print("\nReferencia observada na base modelada por guests_model (sem controlar demais variaveis):")
+    print(reference.round(2).to_string(index=False))
+
+
+def print_controlled_guest_impact(modeling_df, artifact):
+    caps = artifact.get("structural_caps", {"guests": 16})
+    max_guests = caps.get("guests", 16)
+    eligible = modeling_df.loc[modeling_df["guests"].lt(max_guests)].copy()
+    base_pred, _ = predict_base_price(eligible, artifact)
+
+    variant = eligible.copy()
+    variant["guests"] = variant["guests"] + 1
+    variant_pred, _ = predict_base_price(variant, artifact)
+
+    impact = pd.DataFrame(
+        {
+            "bedrooms_model": eligible["bedrooms_model"].to_numpy(),
+            "base_pred": base_pred,
+            "variant_pred": variant_pred,
+        }
+    )
+    impact["delta_rs"] = impact["variant_pred"] - impact["base_pred"]
+    impact["delta_pct"] = impact["delta_rs"] / impact["base_pred"] * 100
+
+    summary = pd.DataFrame(
+        [
+            {
+                "n": len(impact),
+                "median_delta_rs": impact["delta_rs"].median(),
+                "mean_delta_rs": impact["delta_rs"].mean(),
+                "median_delta_pct": impact["delta_pct"].median(),
+                "mean_delta_pct": impact["delta_pct"].mean(),
+            }
+        ]
+    )
+    by_bedrooms = (
+        impact.groupby("bedrooms_model")
+        .agg(
+            n=("delta_rs", "size"),
+            median_delta_rs=("delta_rs", "median"),
+            median_delta_pct=("delta_pct", "median"),
+        )
+        .reset_index()
+    )
+    by_bedrooms = by_bedrooms.loc[by_bedrooms["n"].ge(10)]
+
+    print("\nImpacto controlado de +1 guest no dataset modelado (demais variaveis constantes):")
+    print(summary.round(2).to_string(index=False))
+    print("\nMesmo impacto quebrado por bedrooms_model:")
+    print(by_bedrooms.round(2).to_string(index=False))
+
+
+def run_new_apartment_battery(artifact, modeling_df, trained_neighborhood_counts):
+    consistent_cases = build_consistent_new_apartments()
+    consistent_results = predict_apartment_cases(consistent_cases, artifact, trained_neighborhood_counts)
+    print_apartment_case_table("Bateria de new_apartment coerentes", consistent_results)
+
+    sensitivity_cases = build_guest_only_sensitivity_cases()
+    sensitivity_results = predict_apartment_cases(sensitivity_cases, artifact, trained_neighborhood_counts)
+    print_apartment_case_table(
+        "Sensibilidade isolada: apenas guests muda, estrutura fixa em 1 quarto/1 cama/1 banheiro",
+        sensitivity_results,
+    )
+
+    stress_results = predict_apartment_cases(build_stress_cases(), artifact, trained_neighborhood_counts)
+    print_apartment_case_table("Stress test de caps e consistencia da entrada", stress_results)
+
+    print_training_guest_reference(modeling_df)
+    print_controlled_guest_impact(modeling_df, artifact)
+
+
 def main():
     print("Carregando modelo. A primeira execucao pode levar alguns segundos...", flush=True)
     artifact = joblib.load(MODEL_PATH)
@@ -260,44 +607,7 @@ def main():
         ).round(2).to_string(index=False)
     )
 
-    # Edite este bloco para testar um novo imovel.
-    new_apartment = pd.DataFrame(
-        [
-            {
-                "airbnb_neighborhood": "Liberdade",
-                "ad_title": "Apartamento completo na Liberdade perto do metro",
-                "listing_obj_type": "REGULAR",
-                "kicker_content_message": "Entire rental unit in Liberdade, perto do metro, wifi e ar condicionado",
-                "is_superhost": True,
-                "is_new_listing": False,
-                "guests": 2,
-                "bedrooms": 1,
-                "beds": 1,
-                "bathrooms": "1",
-                "lat": -23.557,
-                "lon": -46.635,
-            }
-        ]
-    )
-
-    pred, features, issues, fallback = predict_with_diagnostics(new_apartment, artifact, trained_neighborhood_counts)
-    print("\nPredicao para o novo exemplo:")
-    print(f"Preco base estimado: R$ {pred[0]:,.2f} por diaria")
-    print(f"Segmento: {features.iloc[0]['market_segment']}")
-    print(f"Distancia ao centro robusto do mercado: {features.iloc[0]['distance_to_market_center_km']:.1f} km")
-    print_model_feature_snapshot(new_apartment, features)
-
-    if issues:
-        print("\nDiagnosticos:")
-        for issue in issues:
-            print(f"- {issue}")
-        if fallback:
-            print("\nReferencia por comparaveis brutos:")
-            print(f"- Match: {fallback['matched_neighborhoods']}")
-            print(f"- Anuncios: {fallback['n']}")
-            print(f"- Mediana observada: R$ {fallback['median_reference']:,.2f}")
-            print(f"- Media observada: R$ {fallback['mean_reference']:,.2f}")
-
+    run_new_apartment_battery(artifact, modeling_df, trained_neighborhood_counts)
     compare_bedroom_variants(artifact, trained_neighborhood_counts)
 
 

@@ -1,2 +1,11 @@
 airbnb_prices (1).csv
 airbnb_apart (1).csv
+__pycache__/
+*.pyc
+.DS_Store
+*.docx
+models/variable_price_model.joblib
+outputs/variable_model_*.csv
+outputs/variable_model_summary.json
+outputs/tables/variable_model_*.csv
+outputs/tables/all_models_new_apartment_tests.csv

@@ -1,19 +1,19 @@
-# Tabas - Documentação do Case de Base Price
+# Portfolio - Documentação do Projeto de Base Price
 
-Esta documentação acompanha o notebook [`notebooks/01_base_price_modeling_tabas.ipynb`](../notebooks/01_base_price_modeling_tabas.ipynb) e explica o que foi feito, por que cada decisão foi tomada e onde cada ponto do enunciado foi atendido.
+Esta documentação acompanha o notebook [`notebooks/01_base_price_modeling.ipynb`](../notebooks/01_base_price_modeling.ipynb) e explica o que foi feito, por que cada decisão foi tomada e onde cada ponto do projeto foi atendido.
 
-## Entregáveis gerados
+## Artefatos gerados
 
-- Notebook executado: [`notebooks/01_base_price_modeling_tabas.ipynb`](../notebooks/01_base_price_modeling_tabas.ipynb)
-- Modelo treinado: [`models/tabas_base_price_model.joblib`](../models/tabas_base_price_model.joblib)
+- Notebook executado: [`notebooks/01_base_price_modeling.ipynb`](../notebooks/01_base_price_modeling.ipynb)
+- Modelo treinado: [`models/base_price_model.joblib`](../models/base_price_model.joblib)
 - Predições de holdout: [`outputs/holdout_predictions.csv`](../outputs/holdout_predictions.csv)
 - Tabelas: [`outputs/tables/`](../outputs/tables/)
 - Figuras: [`outputs/figures/`](../outputs/figures/)
-- Resumo estruturado: [`outputs/case_summary.json`](../outputs/case_summary.json)
+- Resumo estruturado: [`outputs/project_summary.json`](../outputs/project_summary.json)
 
-## Checklist do enunciado
+## Checklist do projeto
 
-| Ponto do case | Como foi atendido |
+| Ponto do projeto | Como foi atendido |
 |---|---|
 | Data cleaning e preprocessing | Conversão de datas, parsing de banheiros, remoção de índice artificial, filtros de preço, filtros geográficos e filtros estruturais. |
 | Exploratory analysis | Distribuição de preço, cauda extrema, preço por bairro, diagnóstico geográfico, LOS e segmentos premium/estendidos. |
@@ -36,7 +36,7 @@ A decisão central foi separar dois problemas:
 - **Preço base estrutural:** valor esperado por imóvel dado estrutura, localização e atributos observáveis.
 - **Preço dinâmico:** ajustes por sazonalidade, eventos, feriados, antecedência, ocupação e LOS.
 
-Este case resolve apenas o primeiro. Por isso, `check_in`, `check_out`, `los` e `reference_date` não foram usados como preditores finais.
+Este projeto resolve apenas o primeiro. Por isso, `check_in`, `check_out`, `los` e `reference_date` não foram usados como preditores finais.
 
 ## 2. Dados e cobertura
 
@@ -202,7 +202,7 @@ Features categóricas:
 - `airbnb_neighborhood`
 - `listing_obj_type`
 
-Reviews e ratings foram avaliados, mas não entraram no modelo final para manter portabilidade para imóveis novos da Tabas. O ganho observado não compensou a dependência de informação que pode não existir em produção.
+Reviews e ratings foram avaliados, mas não entraram no modelo final para manter portabilidade para imóveis novos. O ganho observado não compensou a dependência de informação que pode não existir em produção.
 
 ## 7. Modelos e escolha final
 
@@ -349,9 +349,9 @@ Limitações importantes:
 - Alguns bairros têm poucos exemplos.
 - A cauda premium é subestimada e precisa de camada especializada ou revisão humana.
 - O filtro de 150 km foi calibrado para remover contaminações fortes e manter caudas válidas de praia; em múltiplas cidades deve ser parametrizado por mercado.
-- O alvo é uma estimativa do mercado Airbnb, não necessariamente o preço ótimo de receita da Tabas.
+- O alvo é uma estimativa do mercado Airbnb, não necessariamente o preço ótimo de receita do negócio.
 
-## 11. Como operacionalizar na Tabas
+## 11. Como operacionalizar em produção
 
 Fluxo recomendado:
 
@@ -363,13 +363,13 @@ Fluxo recomendado:
 6. Monitorar MAE/MAPE por cidade, bairro, quartos e faixa de preço.
 7. Reestimar o alvo periodicamente com novas cotações de mercado.
 
-Artefato atual: `models/tabas_base_price_model.joblib`.
+Artefato gerado pelo notebook: `models/base_price_model.joblib`.
 
 ### Como testar corretamente
 
-O pipeline salvo espera as features de modelagem já derivadas. Para testar um imóvel bruto, use `scripts/test_model.py` ou replique a função `add_features()` antes de chamar `predict`.
+O artefato salvo contém um único modelo final. Para testar um imóvel bruto, use `scripts/test_model.py` ou replique a função `add_features()` antes de chamar `predict`.
 
-Ponto importante: o modelo não usa `bedrooms`, `guests`, `beds` e `bathrooms` brutos diretamente. Ele usa:
+Ponto importante: antes da previsão, a feature engineering cria colunas derivadas. Esses campos são features de entrada criadas no preprocessing:
 
 - `bedrooms_model`
 - `guests_model`
@@ -384,6 +384,20 @@ Use este comando para ver uma comparação controlada de Liberdade variando quar
 .\.venv\Scripts\python scripts\test_model.py
 ```
 
+
+### Melhoria proposta: faixas de incerteza e comparáveis
+
+O artefato gerado pelo notebook é `models/base_price_model.joblib`. Como evolução futura, eu proporia camadas complementares para lidar melhor com imóveis grandes, bairros heterogêneos e cauda premium:
+
+- modelo global p50 em log-preço como âncora estável;
+- modelos p75 e p90 para expor faixa de incerteza;
+- estimadores p50 por segmento quando houver amostra suficiente;
+- classificador de cauda/premium, por exemplo `acima do p75 do bairro/segmento`;
+- camada de comparáveis por bairro, estrutura e segmento.
+
+Essa melhoria não é necessária para reproduzir a versão principal. Ela seria uma próxima etapa de produção para evitar falsa precisão em imóveis fora do padrão do bairro. Nesses casos, o sistema deveria retornar preço p50, faixa p75/p90, comparáveis e flag de revisão humana.
+
+
 ## 12. Extensão futura para dynamic pricing
 
 Para evoluir de preço base para preço dinâmico, a arquitetura recomendada é multiplicativa:
@@ -396,7 +410,7 @@ Próximos componentes:
 - Calendário de eventos e feriados.
 - Curvas de antecedência e last-minute.
 - Elasticidade por LOS.
-- Otimização com ocupação, pickup e inventário Tabas.
+- Otimização com ocupação, pickup e inventário operacional.
 - Experimentos A/B ou backtesting com receita, ADR, RevPAR e ocupação.
 
 ## 13. Reprodutibilidade
@@ -411,7 +425,7 @@ python -m venv .venv
 Para recriar o notebook:
 
 ```powershell
-.\.venv\Scripts\python scripts\create_case_notebook.py
+.\.venv\Scripts\python scripts\create_project_notebook.py
 ```
 
-O notebook já foi executado nesta entrega; para reexecutar, abra `notebooks/01_base_price_modeling_tabas.ipynb` no Jupyter/VS Code usando o kernel do `.venv`.
+O notebook já foi executado nesta versão; para reexecutar, abra `notebooks/01_base_price_modeling.ipynb` no Jupyter/VS Code usando o kernel do `.venv`.

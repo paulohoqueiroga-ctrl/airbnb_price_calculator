@@ -5,7 +5,7 @@ import nbformat as nbf
 
 
 ROOT = Path(__file__).resolve().parents[1]
-NOTEBOOK_PATH = ROOT / "notebooks" / "01_base_price_modeling_tabas.ipynb"
+NOTEBOOK_PATH = ROOT / "notebooks" / "01_base_price_modeling.ipynb"
 
 
 def add_markdown(cells, text):
@@ -37,9 +37,9 @@ def main():
     add_markdown(
         cells,
         """
-        # Tabas - Base Price Modeling for Short-Term Rentals
+        # Portfolio - Base Price Modeling for Short-Term Rentals
 
-        Este notebook resolve o case de Data Scientist da Tabas usando as duas bases locais:
+        Este notebook resolve o projeto de portfólio de ciência de dados usando as duas bases locais:
 
         - `airbnb_apart (1).csv`: atributos estruturais e metadados dos anúncios.
         - `airbnb_prices (1).csv`: cotações por janela de estadia, preços e avaliações.
@@ -51,9 +51,9 @@ def main():
     add_markdown(
         cells,
         """
-        ## 0. Leitura dos requisitos do case
+        ## 0. Leitura dos requisitos do projeto
 
-        O enunciado pede explicitamente:
+        O projeto foi organizado para cobrir:
 
         1. Limpeza e pré-processamento das bases.
         2. Análise exploratória cobrindo distribuição de preço, outliers, extremos, preço por bairro e outros insights relevantes.
@@ -452,7 +452,7 @@ def main():
         - Metadados do anúncio: superhost, novo anúncio e tipo do objeto.
         - Texto simples do título/descrição: flags para studio, luxo, vista, metrô, garagem, piscina, academia, Wi-Fi, ar-condicionado, praia e varanda.
 
-        Ratings e reviews foram analisados, mas não entram no modelo final escolhido: eles podem melhorar pouco a previsão, porém reduzem portabilidade para imóveis novos da Tabas, onde esses sinais podem não existir.
+        Ratings e reviews foram analisados, mas não entram no modelo final escolhido: eles podem melhorar pouco a previsão, porém reduzem portabilidade para imóveis novos, onde esses sinais podem não existir.
         """,
     )
 
@@ -1004,9 +1004,11 @@ def main():
         """
         ## 8. Artefatos de produção e resumo executivo
 
-        O objeto salvo em `models/tabas_base_price_model.joblib` contém o pipeline de pré-processamento tabular e o modelo final. A engenharia de features anterior ao pipeline (`bathrooms_num`, distância, `market_segment`, flags de texto e razões estruturais) está documentada neste notebook e deve ser empacotada como transformação versionada em produção.
+        O objeto salvo em `models/base_price_model.joblib` contém o pipeline de pré-processamento tabular e o modelo final. A engenharia de features anterior ao pipeline (`bathrooms_num`, distância, `market_segment`, flags de texto e razões estruturais) está documentada neste notebook e deve ser empacotada como transformação versionada em produção.
 
-        Atenção para testes manuais: o pipeline final não usa `bedrooms`, `guests`, `beds` e `bathrooms` brutos diretamente. Ele usa `bedrooms_model`, `guests_model`, `beds_model` e `bathrooms_model`, gerados antes do `predict`. Portanto, mudar apenas `bedrooms` em um dataframe já processado não altera a previsão; é necessário refazer a feature engineering. Também há caps robustos: por exemplo, 12 quartos vira `bedrooms_model = 10`, para evitar extrapolação instável fora da amostra.
+        Atenção para testes manuais: o artefato salvo contém um único modelo final. Antes do `predict`, é obrigatório aplicar a mesma feature engineering para criar colunas derivadas como `bedrooms_model`, `guests_model`, `beds_model` e `bathrooms_model`. Esses campos são **features de entrada criadas no preprocessing**.
+
+        Portanto, mudar apenas `bedrooms`, `guests`, `beds` ou `bathrooms` em um dataframe já processado pode não alterar a previsão se as features derivadas não forem recalculadas. Também há caps robustos: por exemplo, 12 quartos vira `bedrooms_model = 10`, para evitar extrapolação instável fora da amostra.
         """,
     )
 
@@ -1031,7 +1033,7 @@ def main():
             "max_training_distance_km": 150.0,
             "structural_caps": {"guests": 16, "bedrooms": 10, "beds": 30, "bathrooms": 10},
         }
-        joblib.dump(model_artifact, MODEL_DIR / "tabas_base_price_model.joblib")
+        joblib.dump(model_artifact, MODEL_DIR / "base_price_model.joblib")
 
         best_metrics = metrics_df.loc[metrics_df["model"].eq(best_model_name)].iloc[0].to_dict()
         summary = {
@@ -1047,12 +1049,12 @@ def main():
             "top_features": feature_importance.head(10).to_dict(orient="records"),
             "scenario_impacts": scenario_impacts.to_dict(orient="records"),
         }
-        with open(OUT / "case_summary.json", "w", encoding="utf-8") as f:
+        with open(OUT / "project_summary.json", "w", encoding="utf-8") as f:
             json.dump(summary, f, ensure_ascii=False, indent=2)
 
         print("Artefatos salvos:")
-        print(f"- {MODEL_DIR / 'tabas_base_price_model.joblib'}")
-        print(f"- {OUT / 'case_summary.json'}")
+        print(f"- {MODEL_DIR / 'base_price_model.joblib'}")
+        print(f"- {OUT / 'project_summary.json'}")
         print(f"- {TABLE_DIR}")
         print(f"- {FIG_DIR}")
         display(pd.DataFrame([summary["metrics"]]).round(3))
@@ -1062,13 +1064,63 @@ def main():
     add_markdown(
         cells,
         """
-        ## 9. Conclusões
+        ## 9. Melhorias propostas: faixas de incerteza e comparáveis
+
+        O artefato gerado por este notebook é o modelo final do projeto: `models/base_price_model.joblib`. Como melhoria futura, eu adicionaria camadas complementares para lidar com imóveis grandes, cauda premium e bairros heterogêneos.
+
+        Proposta de arquitetura:
+
+        - manter um modelo global p50 em log-preço como âncora estável;
+        - treinar modelos p75 e p90 para expor faixa de incerteza/cauda;
+        - treinar estimadores p50 por segmento quando houver amostra suficiente (`urban_compact`, `urban_family`, `urban_large`, `beach_premium`, `extended_market`);
+        - adicionar um classificador de cauda/premium, por exemplo `acima do p75 do bairro/segmento`;
+        - adicionar uma camada de comparáveis por bairro, estrutura e segmento.
+
+        Por que isso ajudaria:
+
+        - o ponto p50 preserva estabilidade e interpretabilidade;
+        - p75/p90 evitam falsa precisão em imóveis de cauda, como unidades premium ou muito acima do padrão do bairro;
+        - comparáveis locais ajudam quando há boa densidade de exemplos em um bairro;
+        - o classificador premium cria um gatilho de revisão humana ou de uso de preço mais conservador/agressivo.
+
+        Em produção, eu não automatizaria apenas um número para imóveis fora da distribuição. A recomendação seria retornar `preço p50`, `faixa p75/p90`, comparáveis e flags de revisão.
+        """,
+    )
+
+    add_markdown(
+        cells,
+        """
+        ## 10. Conclusões
 
         - O preço base foi definido no nível do anúncio, usando mediana robusta das cotações por `id`.
         - `check_in`, `check_out`, `los` e `reference_date` foram excluídos das features finais para evitar modelagem dinâmica; eles foram usados apenas na auditoria/construção do alvo.
         - O modelo final é interpretável por importâncias, cenários contrafactuais e avaliação por segmentos.
         - A cauda alta foi mantida no treinamento, mas imóveis premium/luxo e praia têm maior erro e devem ter monitoramento/governança separados.
+        - Como melhoria futura, camadas de segmentos, comparáveis e intervalos p50/p75/p90 podem reduzir falsa precisão em imóveis de cauda.
         - Para produção, a recomendação é versionar a transformação de features, monitorar drift por cidade/bairro/faixa de preço e reestimar o alvo com novas cotações periodicamente.
+        """,
+    )
+
+    add_markdown(
+        cells,
+        """
+        ## 11. Extensão futura para dynamic pricing
+
+        Este projeto modela apenas o preço base estrutural. Para evoluir para dynamic pricing, a arquitetura recomendada é multiplicativa:
+
+        `preço final = preço base estrutural × fator sazonal × fator evento × fator antecedência × fator LOS × fator ocupação × restrições comerciais`
+
+        Componentes futuros:
+
+        - sazonalidade por cidade, bairro, dia da semana e mês;
+        - calendário de feriados e eventos;
+        - curvas de antecedência e last-minute;
+        - elasticidade por LOS;
+        - ajuste por ocupação, pickup e inventário;
+        - backtesting com ADR, RevPAR, ocupação e receita total;
+        - testes A/B ou experimentos controlados antes de automatizar mudanças de preço.
+
+        O ponto importante é manter a separação: o modelo deste notebook estima valor estrutural; os fatores dinâmicos devem entrar como multiplicadores ou camadas posteriores, monitoradas separadamente.
         """,
     )
 
